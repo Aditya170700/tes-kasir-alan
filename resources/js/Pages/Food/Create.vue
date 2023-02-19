@@ -1,9 +1,9 @@
 <script setup>
+import FormError from "@/Components/FormError.vue";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
-import { Head } from "@inertiajs/vue3";
-import { reactive } from "@vue/reactivity";
+import { Head, useForm } from "@inertiajs/vue3";
 
-let data = reactive({
+let form = useForm({
     changeBorder: false,
     fotoError: null,
     fotoPreview: null,
@@ -11,16 +11,17 @@ let data = reactive({
     nama: "",
     foto: null,
     harga: 0,
+    errors: null,
 });
 
 function onDragOver(e) {
     e.preventDefault();
-    data.changeBorder = true;
+    form.changeBorder = true;
 }
 
 function onDrop(e) {
     e.preventDefault();
-    data.changeBorder = false;
+    form.changeBorder = false;
 
     [...e.dataTransfer.items].forEach((item, i) => {
         if (item.kind === "file") {
@@ -31,7 +32,7 @@ function onDrop(e) {
 
 function onDragLeave(e) {
     e.preventDefault();
-    data.changeBorder = false;
+    form.changeBorder = false;
 }
 
 function onClick(e) {
@@ -43,19 +44,26 @@ function changeFile(e) {
 }
 
 function readerFoto(file) {
-    data.fotoError = null;
+    form.fotoError = null;
 
     if (!["png", "jpg", "jpeg", "webp"].includes(file.name.split(".").pop())) {
-        data.fotoError = "Ekstensi harus png/jpg/jpeg/webp";
+        form.fotoError = "Ekstensi harus png/jpg/jpeg/webp";
         return;
     }
 
-    data.fotoName = file.name;
+    form.fotoName = file.name;
     const reader = new FileReader();
     reader.onload = (e) => {
-        data.fotoPreview = e.target.result;
+        form.fotoPreview = e.target.result;
+        form.foto = e.target.result.replace(/^data:image\/[a-z]+;base64,/, "");
     };
     reader.readAsDataURL(file);
+}
+
+function submit() {
+    form.transform((data) => ({
+        ...data,
+    })).post(route("foods.store"));
 }
 </script>
 
@@ -70,7 +78,7 @@ function readerFoto(file) {
                 >
                     <p class="text-sky-400 font-bold mb-10">Tambahkan Menu</p>
 
-                    <form>
+                    <form @submit.prevent="submit">
                         <div class="mb-6">
                             <label
                                 for="nama"
@@ -81,7 +89,12 @@ function readerFoto(file) {
                                 type="text"
                                 id="nama"
                                 class="bg-white border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-sky-400 focus:border-sky-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-400 dark:focus:border-sky-400"
+                                v-model="form.nama"
                                 required
+                            />
+                            <FormError
+                                :message="form.errors?.nama"
+                                v-if="form.errors?.nama"
                             />
                         </div>
                         <div class="mb-6">
@@ -98,8 +111,8 @@ function readerFoto(file) {
                             />
                             <div
                                 :class="`p-6 bg-gray-50 border rounded-sm dark:bg-gray-800 dark:border-gray-700 text-center hover:bg-gray-100 cursor-pointer hover:border-sky-400 ${
-                                    data.changeBorder ? 'border-sky-400' : ''
-                                } ${data.fotoError ? 'border-red-500' : ''}`"
+                                    form.changeBorder ? 'border-sky-400' : ''
+                                } ${form.fotoError ? 'border-red-500' : ''}`"
                                 @drop="onDrop"
                                 @dragover="onDragOver"
                                 @dragleave="onDragLeave"
@@ -107,30 +120,34 @@ function readerFoto(file) {
                             >
                                 <i
                                     :class="`fas fa-cloud-arrow-up ${
-                                        !data.fotoError
+                                        !form.fotoError
                                             ? 'text-gray-400'
                                             : 'text-red-500'
                                     }`"
                                 ></i>
                                 <p
                                     class="font-bold text-gray-400 text-sm"
-                                    v-if="!data.fotoError && !data.fotoName"
+                                    v-if="!form.fotoError && !form.fotoName"
                                 >
                                     drag and drop a file here or click
                                 </p>
                                 <p
                                     class="font-bold text-red-500 text-sm"
-                                    v-if="data.fotoError"
+                                    v-if="form.fotoError"
                                 >
-                                    {{ data.fotoError }}
+                                    {{ form.fotoError }}
                                 </p>
                                 <p
                                     class="font-bold text-gray-400 text-sm"
-                                    v-if="data.fotoName"
+                                    v-if="form.fotoName"
                                 >
-                                    {{ data.fotoName }}
+                                    {{ form.fotoName }}
                                 </p>
                             </div>
+                            <FormError
+                                :message="form.errors?.foto"
+                                v-if="form.errors?.foto"
+                            />
                         </div>
                         <div class="mb-6">
                             <label
@@ -145,12 +162,17 @@ function readerFoto(file) {
                                     RP.
                                 </div>
                                 <input
-                                    type="text"
+                                    type="number"
                                     id="harga"
-                                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-sky-400 focus:border-sky-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-400 dark:focus:border-sky-400"
+                                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-sky-400 focus:border-sky-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-400 dark:focus:border-sky-400 pl-14"
+                                    v-model="form.harga"
                                     required
                                 />
                             </div>
+                            <FormError
+                                :message="form.errors?.harga"
+                                v-if="form.errors?.harga"
+                            />
                         </div>
                         <div class="text-right">
                             <button

@@ -2,6 +2,9 @@
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import { Link } from "@inertiajs/vue3";
+import { useAttrs } from "@vue/runtime-core";
+
+let attrs = useAttrs();
 </script>
 
 <template>
@@ -28,28 +31,28 @@ import { Link } from "@inertiajs/vue3";
                             <tr>
                                 <th
                                     scope="col"
-                                    class="py-5 text-center"
+                                    class="py-5 text-center font-bold"
                                     style="width: 5%"
                                 >
                                     #
                                 </th>
                                 <th
                                     scope="col"
-                                    class="py-5 px-6"
+                                    class="py-5 px-6 font-bold"
                                     style="width: 50%"
                                 >
                                     Nama
                                 </th>
                                 <th
                                     scope="col"
-                                    class="py-5 px-6 text-center"
+                                    class="py-5 px-6 text-center font-bold"
                                     style="width: 20%"
                                 >
                                     Foto
                                 </th>
                                 <th
                                     scope="col"
-                                    class="py-5 px-6"
+                                    class="py-5 px-6 font-bold"
                                     style="width: 25%"
                                 >
                                     Harga
@@ -61,20 +64,20 @@ import { Link } from "@inertiajs/vue3";
                                 :class="`${
                                     i % 2 != 0 ? 'bg-white' : 'bg-gray-50'
                                 } hover:bg-gray-100`"
-                                v-for="i in 10"
+                                v-for="(data, i) in attrs.results"
                                 :key="i"
                             >
-                                <td class="py-2 text-center">{{ i }}</td>
-                                <td class="px-6 py-2">Sate Ayam</td>
+                                <td class="py-2 text-center">{{ i + 1 }}</td>
+                                <td class="px-6 py-2">{{ data.nama }}</td>
                                 <td class="px-6 py-2">
                                     <img
-                                        src="https://kbu-cdn.com/dk/wp-content/uploads/sate-ayam.jpg"
-                                        alt="Sate Ayam"
+                                        :src="data.foto_url"
+                                        :alt="data.nama"
                                         class="h-auto mx-auto"
                                         style="width: 50%"
                                     />
                                 </td>
-                                <td class="px-6 py-2">Rp. 30.000</td>
+                                <td class="px-6 py-2">{{ data.idr_harga }}</td>
                             </tr>
                         </tbody>
                     </table>
