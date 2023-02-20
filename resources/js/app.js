@@ -5,20 +5,9 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
-import { createToast } from "mosha-vue-toastify";
-import "mosha-vue-toastify/dist/style.css";
+import { toast } from '@/utils';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
-
-function toast(message, success = true) {
-    createToast(message, {
-        type: success ? 'success' : 'danger',
-        timeout: 3000,
-        position: 'top-right',
-        showIcon: true,
-        toastBackgroundColor: success ? '#0E9F6E' : '#F05252',
-    });
-}
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
